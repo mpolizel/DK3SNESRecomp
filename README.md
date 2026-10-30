@@ -51,7 +51,9 @@ git -C snesrecomp apply ../patches/snesrecomp-nmi-idle-loop-wai.patch
 The second is required for this game: DKC3's NMI handler resets the stack and
 falls into a `WAI / BRA` idle loop instead of returning with RTI, and without
 the patch that loop runs to the interpreter's step cap every frame (black
-screen at ~4 fps).
+screen at ~4 fps). The patch also lets such a handler outlast a frame:
+DKC1's NMI uploads sound data with NMI off for several frames, and
+without it the upload was cut and the game froze on the intro screen.
 
 ## ROM identity
 
