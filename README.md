@@ -11,6 +11,23 @@ Run Donkey Kong Country 3 natively on Windows.
 > this project, in the repository or in any release. The recompiled C is
 > generated locally from your own copy and is never committed.
 
+## Download (ready-to-run Windows build)
+
+Get the latest `donkeykongcountry3-<version>-windows-x64.zip` from the
+[Releases page](https://github.com/mpolizel/DK3SNESRecomp/releases/latest).
+
+The zip is a **setup pack**: it contains the launcher, the recompiler and this
+source tree (with the framework patches already applied), but no game data.
+On first run:
+
+1. Unzip anywhere and start `DonkeyKongCountry3SNESRecomp.exe`.
+2. Let it download the portable build tools (one time per machine), or point
+   it at a `cmake-clang-v1` zip you already have.
+3. Pick your own `Donkey Kong Country 3 (USA).sfc` — the North American
+   (En,Fr) release, CRC32 `448eec19`.
+4. Press **Generate & rebuild**. The playable game is built into `build/` and
+   started; run it from there afterwards.
+
 ## Status
 
 Boots through the Nintendo logo and copyright into the opening world-map
