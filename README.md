@@ -3,7 +3,7 @@
 A native recompilation of **Donkey Kong Country 3** (USA), built on
 [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp).
 
-_Add a short description here._
+Run Donkey Kong Country 3 natively on Windows.
 
 
 
@@ -13,10 +13,28 @@ _Add a short description here._
 
 ## Status
 
-Scaffolded on 2026-10-30 — **not yet a working port.** The layout, build,
-regeneration pipeline, CI, and packaging are wired up; the game does not run
-until the host work in `src/game_rtl.c` is done. See
+Boots through the Nintendo logo and copyright into the opening world-map
+scene. Most code still runs through the snesrecomp interpreter; levels,
+saves and full play-through are not yet verified. See
 [Porting from here](#porting-from-here).
+
+Launcher **Settings → Shader** lists the scanline, CRT and upscaler presets;
+choosing one switches the renderer to OpenGL automatically.
+
+### Framework patches
+
+`patches/` holds two changes to the `snesrecomp` submodule. Reapply them after
+updating the submodule:
+
+```sh
+git -C snesrecomp apply ../patches/snesrecomp-shader-forces-opengl.patch
+git -C snesrecomp apply ../patches/snesrecomp-nmi-idle-loop-wai.patch
+```
+
+The second is required for this game: DKC3's NMI handler resets the stack and
+falls into a `WAI / BRA` idle loop instead of returning with RTI, and without
+the patch that loop runs to the interpreter's step cap every frame (black
+screen at ~4 fps).
 
 ## ROM identity
 
@@ -109,7 +127,10 @@ Two players, one controller per port.
 
 ## License
 
-This project's own source is under the license in `LICENSE`. The framework
-carries its own terms — see `snesrecomp/LICENSE` and
-`snesrecomp/THIRD_PARTY_ATTRIBUTION.md`. Neither covers the game data, which
-is not distributed here.
+This project's own source is under the MIT license in `LICENSE`. The
+framework carries its own terms (PolyForm Noncommercial 1.0.0) — see
+`snesrecomp/LICENSE` and `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`; the change
+in `patches/` applies to that framework and falls under its terms. The
+shaders under `assets/shaders/_libretro/` come from libretro/glsl-shaders and
+keep each author's license in their file headers. None of these cover the
+game data, which is not distributed here.
