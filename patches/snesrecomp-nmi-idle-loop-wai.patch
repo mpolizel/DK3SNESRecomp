@@ -1,0 +1,38 @@
+diff --git a/runner/src/beam_frame_driver.c b/runner/src/beam_frame_driver.c
+index d6086b35..d5c4feea 100644
+--- a/runner/src/beam_frame_driver.c
++++ b/runner/src/beam_frame_driver.c
+@@ -152,6 +152,10 @@ void snes_beam_frame_driver_run_frame(void) {
+     s_wai_halted = false;
+     run_interrupt(nmi_vector(), frame_end);
+     g_snes->inNmi = false;
++    /* A handler that never returns (it reset S and fell into the idle loop)
++     * yields at that loop's WAI: the CPU is halted until the next interrupt. */
++    if (interp_bridge_lle_took_wai())
++      s_wai_halted = true;
+   }
+ 
+   /* Run out the field, taking each interrupt at the beam position it latches
+diff --git a/runner/src/snes/interp_bridge.c b/runner/src/snes/interp_bridge.c
+index af45ff14..c950bcc3 100644
+--- a/runner/src/snes/interp_bridge.c
++++ b/runner/src/snes/interp_bridge.c
+@@ -2808,10 +2808,16 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
+          * restore the old hook before the custom NMI can run (Metal Warriors
+          * LucasArts logo at $00:B7A3). Resume PC is the instruction after WAI.
+          * Only yield from scheduler/quiescent runs — never from a host
+-         * interrupt handler (stop_on_rti), where nested delivery isn't set up. */
++         * interrupt handler (stop_on_rti), where nested delivery isn't set up.
++         * Exception: a handler that discarded its own interrupt frame (S is
++         * back above the frame the host pushed, without an RTI) has become
++         * the main loop -- Rare's DKC engine resets S and jumps to its
++         * `WAI / BRA` idle loop from NMI. That WAI is the frame boundary. */
+         if (in.waiting) {
+             in.waiting = false;
+-            if (auto_quiescent || yield_pc) {
++            const bool frame_discarded =
++                stop_on_rti && in.sp > s_exit && (uint16_t)(in.sp - s_exit) >= 3;
++            if (auto_quiescent || yield_pc || frame_discarded) {
+                 lle_resume_set(((uint32_t)in.k << 16) | in.pc, INTERP_RESUME_SITE_WAI, in.sp);
+                 s_lle_wai_yield = 1;
+                 sync_interp_to_cpu(&in, cpu);

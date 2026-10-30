@@ -99,6 +99,32 @@ snesrecomp_target_sdl(DonkeyKongCountry3SNESRecomp)
 # hooks; the host is the framework's and improves on a submodule pull.
 # Add TIER2 once this port reads the interpreter-gap manifest after each run.
 snesrecomp_target_desktop_host(DonkeyKongCountry3SNESRecomp)
+# Windows: a window app, so no console opens beside the game; diagnostics go
+# to DonkeyKongCountry3SNESRecomp.log (src/main.c). -DDKC3_CONSOLE=ON brings
+# the console back for debugging.
+option(DKC3_CONSOLE "Build the Windows executable with a console window" OFF)
+if(WIN32)
+    if(DKC3_CONSOLE)
+        target_compile_definitions(DonkeyKongCountry3SNESRecomp PRIVATE DKC3_CONSOLE=1)
+    else()
+        set_target_properties(DonkeyKongCountry3SNESRecomp PROPERTIES WIN32_EXECUTABLE TRUE)
+        if(MSVC)
+            # Keep the portable main() entry point instead of WinMain.
+            target_link_options(DonkeyKongCountry3SNESRecomp PRIVATE /ENTRY:mainCRTStartup)
+        endif()
+    endif()
+endif()
+# Shader presets for the launcher's Shader list: the framework's built-ins plus
+# the curated libretro scanline/CRT/upscaler set in assets/shaders (refreshed
+# by tools/import_libretro_shaders.py).
+snesrecomp_target_shader_presets(DonkeyKongCountry3SNESRecomp)
+file(GLOB_RECURSE DKC3_SHADER_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/assets/shaders/*")
+set_property(TARGET DonkeyKongCountry3SNESRecomp APPEND PROPERTY LINK_DEPENDS ${DKC3_SHADER_FILES})
+add_custom_command(TARGET DonkeyKongCountry3SNESRecomp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets/shaders"
+        "$<TARGET_FILE_DIR:DonkeyKongCountry3SNESRecomp>/assets/shaders"
+    COMMENT "DonkeyKongCountry3SNESRecomp: staging libretro shader presets" VERBATIM)
 # rom.cfg (the ROM the wizard set this project up from; git-ignored) is
 # staged beside the executable when none is there yet, so the first launch
 # opens on that dump rather than asking for one.
