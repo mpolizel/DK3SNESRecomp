@@ -1,0 +1,26 @@
+# ROM identity for Donkey Kong Country 3 — the single source of truth.
+#
+# Read by three consumers, so a revision change is made once, here:
+#   - the build   (CMake generates snesrecomp_rom_identity.h from this file)
+#   - tools/regen.sh
+#   - .github/workflows/release.yml
+#
+# Format is `key = value`, one per line; `#` starts a comment. Values may be
+# quoted. Leaving a digest empty means the build cannot verify a ROM it is
+# handed — it will say so rather than accept it.
+
+display_name    = Donkey Kong Country 3
+rom_file        = Donkey Kong Country 3 (USA).sfc
+# Every digest of the bare image (copier header stripped), so the Retro
+# catalog can take a submission's identity from this file rather than ask
+# the submitter to hash the ROM again. The build verifies on crc32/sha256.
+expected_crc32  = 448eec19
+expected_md5    = 120abf304f0c40fe059f6a192ed4f947
+expected_sha1   = d737e90d91dba8620fd5c2985eb6ff2cda7f23f9
+expected_sha256 = 2277a2d8dddb01fe5cb0ae9a0fa225d42b3a11adccaeafa18e3c339b3794a32b
+rom_size        = 4194304
+mapping         = hirom
+region          = USA
+# What a mod package's [[target]] game_id must name to apply to this title
+# (snesrecomp/docs/MOD_PACKAGES.md). Stable across revisions on purpose.
+game_id         = donkeykongcountry3-usa
